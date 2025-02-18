@@ -1,7 +1,7 @@
 #!/bin/bash
-SEARCHTEXT="TODO"
+SEARCH_PATTERN="(TODO|todo) ?(\w{1,3} ?[:-])? ?[:-]? *"
 ROOT=$(git rev-parse --show-toplevel)
-OUTFILE="todo.md"
+OUTFILE="TODO.md"
 EXCLUDE=''
 
 while getopts "ohlf:t:e:i:" option; do
@@ -18,7 +18,7 @@ while getopts "ohlf:t:e:i:" option; do
             echo -n "       Use this in the git hook. Off by default "
             echo    "for playing around in the terminal"
             echo    "  -o - print output to STDOUT"
-            echo -n "  -f - write to this file (defaults to todo.md and path "
+            echo -n "  -f - write to this file (defaults to TODO.md and path "
             echo    "starts at the repo's root)"
             echo    "  -t - text to search for (defaults to TODO)"
             echo    "  -e - exclude pattern"
@@ -32,7 +32,7 @@ while getopts "ohlf:t:e:i:" option; do
             OUTFILE=$OPTARG
         ;;
         't' )
-            SEARCHTEXT=$OPTARG
+            SEARCH_PATTERN=$OPTARG
         ;;
         'e' )
             EXCLUDE="$EXCLUDE$OPTARG|"
@@ -64,35 +64,27 @@ if [ -z $STDOUT ]; then
     exec 1>$OUTFILE
 fi
 
-echo "## To Do"
+echo "# To Do"
+echo
 
-current_file=''
+# TODO: use rg or ag if exists
 if [[ -z $INCLUDE ]]; then
-    IFS=$'\r\n' tasks=($(git grep -In --full-name $SEARCHTEXT $ROOT | egrep -v "($EXCLUDE)"))
+    IFS=$'\r\n' tasks=($(git -C $ROOT grep -I --line-number --full-name -E $SEARCH_PATTERN | egrep -v "($EXCLUDE)"))
 else
-    IFS=$'\r\n' tasks=($(git grep -In --full-name $SEARCHTEXT $ROOT | egrep "($INCLUDE)"))
+    IFS=$'\r\n' tasks=($(git -C $ROOT grep -I --line-number --full-name -E $SEARCH_PATTERN -- "$INCLUDE"))
 fi
-# -I - skip binaries
-# -n - include line numbers
-# --full-name - the full path (starting from the repo root)
 
 for task in ${tasks[@]}; do
     file=$(echo $task | cut -f1 -d':')
     line=$(echo $task | cut -f2 -d':')
-    item=$(echo $task | cut -f3- -d':' | sed "s/.*$SEARCHTEXT *//g")
+    item=$(echo $task | cut -f3- -d':' | sed -E "s/.*$SEARCH_PATTERN *//g")
 
-    if [[ $file != $current_file ]]; then
-        if [ $current_file ]; then
-            echo
-        fi
-        current_file=$file
-        echo "### \`\`$current_file\`\`"
-    fi
-    echo "(line $line) $item"
-    echo
+    echo "- [ ] [$file:$line]($file#L$line) : $item"
+    
 done
 
-echo "######Generated using [todo.md](https://github.com/charlesthomas/todo.md)"
+echo
+echo "###### Auto generated using [todo-md](https://github.com/yairfine/todo-md)"
 
 if [ -z $LIVEMODE ]; then
     exit
