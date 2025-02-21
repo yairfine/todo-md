@@ -1,5 +1,5 @@
 #!/bin/bash
-SEARCH_PATTERN="(TODO|todo) ?(\w{1,3} ?[:-])? ?[:-]? *"
+SEARCH_PATTERN="(TODO|todo)(\s+(\w){1,3})?\s*[:-]?\s*"
 ROOT=$(git rev-parse --show-toplevel)
 OUTFILE="TODO.md"
 EXCLUDE=''
