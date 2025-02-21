@@ -67,11 +67,15 @@ fi
 echo "# To Do"
 echo
 
-# TODO: use rg or ag if exists
-if [[ -z $INCLUDE ]]; then
-    IFS=$'\r\n' tasks=($(git -C $ROOT grep -I --line-number --full-name -E $SEARCH_PATTERN | egrep -v "($EXCLUDE)"))
+# For performance reasons, prefer use ripgrep or ag
+# Otherwise, fallback to git-grep
+
+if command -v rg > /dev/null; then
+    IFS=$'\r\n' tasks=($(rg --no-heading --with-filename --line-number -e "$SEARCH_PATTERN" "$ROOT" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
+elif command -v ag > /dev/null; then
+    IFS=$'\r\n' tasks=($(ag --no-heading --filename --numbers "$SEARCH_PATTERN" "$ROOT" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
 else
-    IFS=$'\r\n' tasks=($(git -C $ROOT grep -I --line-number --full-name -E $SEARCH_PATTERN -- "$INCLUDE"))
+    IFS=$'\r\n' tasks=($(git -C "$ROOT" grep -I --full-name --line-number -E "$SEARCH_PATTERN" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
 fi
 
 for task in ${tasks[@]}; do
@@ -80,7 +84,7 @@ for task in ${tasks[@]}; do
     item=$(echo $task | cut -f3- -d':' | sed -E "s/.*$SEARCH_PATTERN *//g")
 
     echo "- [ ] [$file:$line]($file#L$line) : $item"
-    
+
 done
 
 echo
