@@ -71,12 +71,14 @@ echo
 # Otherwise, fallback to git-grep
 
 if command -v rg > /dev/null; then
-    IFS=$'\r\n' tasks=($(rg --no-heading --with-filename --line-number -e "$SEARCH_PATTERN" "$ROOT" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
+    IFS=$'\r\n' tasks=($(rg --no-heading --with-filename --line-number --hidden -e "$SEARCH_PATTERN" "$ROOT" | egrep -v "($EXCLUDE)"))
 elif command -v ag > /dev/null; then
-    IFS=$'\r\n' tasks=($(ag --no-heading --filename --numbers "$SEARCH_PATTERN" "$ROOT" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
+    IFS=$'\r\n' tasks=($(ag --no-heading --filename --numbers --hidden "$SEARCH_PATTERN" "$ROOT" | egrep -v "($EXCLUDE)"))
 else
-    IFS=$'\r\n' tasks=($(git -C "$ROOT" grep -I --full-name --line-number -E "$SEARCH_PATTERN" | egrep "($INCLUDE)" | egrep -v "($EXCLUDE)"))
+    IFS=$'\r\n' tasks=($(git -C "$ROOT" grep -I --full-name --line-number -E "$SEARCH_PATTERN" | egrep -v "($EXCLUDE)"))
 fi
+
+# TODO: add support for -i (include)
 
 for task in ${tasks[@]}; do
     file=$(echo $task | cut -f1 -d':')
