@@ -1,96 +1,64 @@
-todo.md
--------
+# Todo MD Generator
 
-Generate a todo.md file based on TODO comments in your git repo.
+A utility script to generate a `TODO.md` file from `TODO` comments in your Git repository. Automatically updates and keeps track of tasks across your codebase.
 
-Add as a git hook to automatically update the todo.md file every time you
-commit!
+## Features
 
-Usage
-=====
+- Generates `TODO.md` files from repository comments
+- Supports custom search patterns (e.g., `TODO`, `FIXME`)
+- Exclude or include specific patterns
+- Live mode to add generated files to Git staging
+- Professional formatting for readability
+- Stage generated files before commit
 
-    todo.md.sh - generate a todo file based on your code
-      -h - display this help
-      -l - LIVE MODE this will add the generated file to your staged changes.
-           Use this in the git hook. Off by default for playing around in the terminal
-      -o - print output to STDOUT
-      -f - write to this file (defaults to todo.md and path starts at the repo's root)
-      -t - text to search for (defaults to TODO)
-      -e - exclude pattern
-      -i - include pattern
+## Usage
 
-Examples
-========
+```bash
+./todo.md.sh [-h] [-o] [-l] [-f OUTPUT_FILE] [-t SEARCH_PATTERN] [-e EXCLUDE_PATTERN] [-i INCLUDE_PATTERN]
+```
 
-## Vanilla
-	todo.md.sh
-Finds all records matching "TODO", and generates a file in the repo root titled
-``todo.md``. Does ***NOT*** add this file to your repo's staged changes.
+### Options
 
-## Different Search Term
-	todo.md.sh -t FIXME
-Finds all records matching "FIXME", and generates a file called ``todo.md``.
+- `-h`: Show help and exit
+- `-o`: Output to standard output instead of a file
+- `-f`: Specify output file (default: `TODO.md`)
+- `-t`: Define search pattern for comments
+- `-e`: Exclude patterns from results
+- `-i`: Include additional patterns in results
+- `-l`: Stage generated files (TODO.md) to Git before commit
 
-## Print to Screen
-	todo.md.sh -o
-Finds all records matching "TODO" and prints to ``STDOUT``.
+### Example
 
-## Custom File
-	todo.md.sh -f please_fix_me.txt
-Finds all records matching "TODO" and writes them to the repo root in a file
-named ``please_fix_me.txt``. You can also provide a path here, and it will write
-to that path, starting from the repo root. IE ``todo.md.sh -f static/todo.md``
-will write the output to a file called ``$repo_root/static/todo.md``.
+```bash
+# Generate TODO.md with default settings and stage it for commit
+./todo.md.sh -l
 
-## LIVE MODE
-	todo.md.sh -l
-Finds all "TODO" records, writes them to todo.md, **and stages todo.md for the
-next** ``git commit``.
+# Search for FIXME comments, save to custom file
+./todo.md.sh -t FIXME -f FIXME.md
+```
 
-## LIVE MODE + STDOUT
-	todo.md.sh -o -l
-This will print a message to ``STDERR`` telling you this doesn't work, and
-ignores LIVE MODE, running as if only ``-o`` was passed. To reiterate: using
-``-o`` and ``-l`` ***will not*** stage anything.
+## Setup as Git Hook (Optional)
 
-Exclusion/Inclusion
-===================
-## Exclude Pattern(s)
-    todo.md.sh -e css
-Don't print anything containing the string "css". (This includes .css filename
-**and** any lines in the code mentioning "css".)
+For automatic updates, you can configure the script as a Git hook:
 
-    todo.md.sh -e css -e js
-Don't print "css" or "js" lines.
+1. Add the script to your repository.
+2. Make it executable:
 
-## Include Pattern(s)
-    todo.md.sh -i py
-*Only* print lines matching "py" (Again, includes "py" in filename **and** in
-comments.)
+   ```bash
+   chmod u+x todo.md.sh
+   ```
 
-    todo.md.sh -i py -i css
-*Only* print lines matching "py" *or* "css".
+3. Use it as part of your workflow or include it in your `.git/hooks/` directory.
 
----
+To automatically stage generated files before commit, you can use the `-l` flag:
 
--i and -e can't be used together.
+```bash
+# Stage changes to TODO.md before committing
+./todo.md.sh -l
+```
 
--i and -e values are passed to ``egrep``, so any pattern that will work with
-``egrep`` should work with ``todo.md.sh``. See ``man egrep`` for advanced
-patterns.
+This setup ensures that your `TODO.md` file is always up-to-date.
 
-Adding the git hook
-===================
+## Feedback and Contributions
 
-If you want this file to be auto-generated every time you commit, add this to
-``.git/hooks/pre-commit``:
-
-	path/to/todo/script/todo.md.sh -l
-
-You can pass any options **other than -o and -h** to this command. However, if
-you want the todo.md file itself to be inclued in the commit automatically, you
-**must** include ``-l`` (and **not** ``-o``).
-
-### You probably don't want to do this for HUGE repos, or it will significantly slow down the amount of time it takes to run ``git commit``.
-
-### Make sure ***both*** ``todo.md.sh`` ***and*** ``.git/hooks/pre-commit`` have executable permissions or todo.md.sh won't work inside the hook.
+Feel free to submit improvements, feature requests, or bug reports.
