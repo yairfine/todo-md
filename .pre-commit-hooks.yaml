@@ -1,0 +1,7 @@
+-   id: generate-todo-md
+    name: generate todo.md from todo comments
+    description: utility script for generating TODO.md file from repository TODO comments
+    entry: todo.md.sh
+    language: script
+    stages: [pre-commit, manual]
+    minimum_pre_commit_version: 3.2.0
