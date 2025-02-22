@@ -2,7 +2,7 @@
 SEARCH_PATTERN="(TODO|todo)(\s+(\w){1,3})?\s*[:-]?\s*"
 ROOT=$(git rev-parse --show-toplevel)
 OUTFILE="TODO.md"
-EXCLUDE='.pre-commit-'
+EXCLUDE='.pre-commit-|.git'
 
 while getopts "ohlf:t:e:i:" option; do
     case $option in
