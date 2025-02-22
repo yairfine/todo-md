@@ -2,7 +2,7 @@
 SEARCH_PATTERN="(TODO|todo)(\s+(\w){1,3})?\s*[:-]?\s*"
 ROOT=$(git rev-parse --show-toplevel)
 OUTFILE="TODO.md"
-EXCLUDE=''
+EXCLUDE='.pre-commit-'
 
 while getopts "ohlf:t:e:i:" option; do
     case $option in
@@ -35,7 +35,7 @@ while getopts "ohlf:t:e:i:" option; do
             SEARCH_PATTERN=$OPTARG
         ;;
         'e' )
-            EXCLUDE="$EXCLUDE$OPTARG|"
+            EXCLUDE="$EXCLUDE|$OPTARG"
         ;;
         'i' )
             if [[ -z $INCLUDE ]]; then
@@ -52,7 +52,7 @@ if [[ $INCLUDE ]] && [[ $EXCLUDE ]]; then
     exit 1
 fi
 
-EXCLUDE=$EXCLUDE$OUTFILE
+EXCLUDE="$EXCLUDE|$OUTFILE"
 
 if [ $STDOUT ] && [ $LIVEMODE ]; then
     echo "-o and -l can't be used together! Ignoring -l" >&2
